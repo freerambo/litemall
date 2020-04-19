@@ -24,12 +24,6 @@ public class LitemallCommentService {
         return commentMapper.selectByExample(example);
     }
 
-    public int countGoodsByGid(Integer id, int offset, int limit) {
-        LitemallCommentExample example = new LitemallCommentExample();
-        example.or().andValueIdEqualTo(id).andTypeEqualTo((byte) 0).andDeletedEqualTo(false);
-        return (int) commentMapper.countByExample(example);
-    }
-
     public List<LitemallComment> query(Byte type, Integer valueId, Integer showType, Integer offset, Integer limit) {
         LitemallCommentExample example = new LitemallCommentExample();
         example.setOrderByClause(LitemallComment.Column.addTime.desc());
@@ -44,7 +38,7 @@ public class LitemallCommentService {
         return commentMapper.selectByExample(example);
     }
 
-    public int count(Byte type, Integer valueId, Integer showType, Integer offset, Integer size) {
+    public int count(Byte type, Integer valueId, Integer showType) {
         LitemallCommentExample example = new LitemallCommentExample();
         if (showType == 0) {
             example.or().andValueIdEqualTo(valueId).andTypeEqualTo(type).andDeletedEqualTo(false);
@@ -85,37 +79,15 @@ public class LitemallCommentService {
         return commentMapper.selectByExample(example);
     }
 
-    public int countSelective(String userId, String valueId, Integer page, Integer size, String sort, String order) {
-        LitemallCommentExample example = new LitemallCommentExample();
-        LitemallCommentExample.Criteria criteria = example.createCriteria();
-
-        if (!StringUtils.isEmpty(userId)) {
-            criteria.andUserIdEqualTo(Integer.valueOf(userId));
-        }
-        if (!StringUtils.isEmpty(valueId)) {
-            criteria.andValueIdEqualTo(Integer.valueOf(valueId)).andTypeEqualTo((byte) 0);
-        }
-        criteria.andDeletedEqualTo(false);
-
-        return (int) commentMapper.countByExample(example);
-    }
-
     public void deleteById(Integer id) {
         commentMapper.logicalDeleteByPrimaryKey(id);
     }
 
-    public String queryReply(Integer id) {
-        LitemallCommentExample example = new LitemallCommentExample();
-        example.or().andTypeEqualTo((byte) 2).andValueIdEqualTo(id);
-        List<LitemallComment> commentReply = commentMapper.selectByExampleSelective(example, LitemallComment.Column.content);
-        // 目前业务只支持回复一次
-        if (commentReply.size() == 1) {
-            return commentReply.get(0).getContent();
-        }
-        return null;
-    }
-
     public LitemallComment findById(Integer id) {
         return commentMapper.selectByPrimaryKey(id);
+    }
+
+    public int updateById(LitemallComment comment) {
+        return commentMapper.updateByPrimaryKeySelective(comment);
     }
 }
